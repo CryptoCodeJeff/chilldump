@@ -11,12 +11,16 @@
     const config = {
       type: Phaser.AUTO,
       parent: gameContainer,
-      width: 800,
-      height: 600,
+      scale: {
+        mode: Phaser.Scale.RESIZE,
+        width: '100%',
+        height: '100%',
+      },
+      pixelArt: true,
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 600 },
+          gravity: { y: 200 },
           debug: false,
         },
       },
@@ -33,6 +37,7 @@
     let cursors
 
     function preload() {
+      this.load.image('background', '/backgrounds/banner.png')
       this.load.image('player', '/sprites/normal.png')
       this.load.image('playerWalk', '/sprites/walk.png')
       this.load.image('playerWalk2', '/sprites/walk2.png')
@@ -40,7 +45,16 @@
     }
 
     function create() {
-      player = this.physics.add.sprite(400, 300, 'player').setScale(0.3)
+      const { width, height } = this.scale
+
+      // Añadir el fondo y escalarlo para que cubra toda la pantalla
+      const bg = this.add.image(width / 2, height / 2, 'background')
+      const scaleX = width / bg.width
+      const scaleY = height / bg.height
+      const scale = Math.max(scaleX, scaleY)
+      bg.setScale(scale).setScrollFactor(0)
+
+      player = this.physics.add.sprite(width / 2, height / 2, 'player').setScale(0.3)
       player.setCollideWorldBounds(true)
       cursors = this.input.keyboard.createCursorKeys()
 
@@ -68,7 +82,7 @@
       }
 
       if (cursors.up.isDown && onGround) {
-        player.setVelocityY(-330)
+        player.setVelocityY(-400)
       }
 
       // Lógica de animaciones y texturas
@@ -91,11 +105,20 @@
 
 <style>
   .game-wrapper {
+    width: 100%;
+    height: 100dvh;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 600px;
     background: #000;
+    overflow: hidden;
+  }
+
+  /* Asegura que el canvas de Phaser se comporte bien */
+  :global(canvas) {
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain;
   }
 </style>
 
