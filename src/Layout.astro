@@ -1,0 +1,36 @@
+---
+
+
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chill Dump</title>
+  </head>
+  <body>
+    <slot /> 
+    <style lang="scss" is:global>
+      @use '@/sass/global.scss';
+    </style>
+  </body>
+</html>
+
+<script>
+  /* --- Smooth Scroll --- */
+  import Lenis from 'lenis'
+  import 'lenis/dist/lenis.css'
+
+  const lenis = new Lenis()
+
+  // Use requestAnimationFrame to continuously update the scroll
+  const raf = (time) => {
+    lenis.raf(time)
+    requestAnimationFrame(raf)
+
+    lenis.start()
+}
+
+  requestAnimationFrame(raf)
+</script>

@@ -1,0 +1,23 @@
+{
+  "name": "chilldump",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/svelte": "^7.2.4",
+    "astro": "^5.16.6",
+    "lenis": "^1.3.16",
+    "phaser": "^3.90.0",
+    "prettier": "^3.7.4",
+    "prettier-plugin-astro": "latest",
+    "prettier-plugin-svelte": "latest",
+    "sass": "^1.97.1",
+    "svelte": "^5.46.0",
+    "typescript": "^5.9.3"
+  }
+}

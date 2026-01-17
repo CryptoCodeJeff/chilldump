@@ -1,0 +1,3 @@
+- Explicar una moneda a la semana
+- Explicar el sistema de dumpfun
+- Mindset
