@@ -3,6 +3,7 @@
   import titleHTML from '../content/game/title.html?raw'
   import step1HTML from '../content/game/step1.html?raw'
   import step2HTML from '../content/game/step2.html?raw'
+  import step3HTML from '../content/game/step3.html?raw'
 
   let gameContainer
   let game
@@ -13,8 +14,10 @@
     const config = {
       type: Phaser.AUTO,
       parent: gameContainer,
+      transparent: true,
       dom: {
         createContainer: true,
+        behindCanvas: true,
       },
       scale: {
         mode: Phaser.Scale.RESIZE,
@@ -25,8 +28,8 @@
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 500 },
-          debug: true,
+          gravity: { y: 400 },
+          debug: false,
           fixedStep: false,
         },
       },
@@ -59,15 +62,8 @@
       this.cameras.main.setBounds(0, 0, width, worldHeight)
 
       // Fondo infinito
-      // 1. Usa solo 'height' en lugar de 'worldHeight' para el fondo fijo
-      // 2. Usamos .setOrigin(0.5, 0.5) para centrarla bien
-      const bg = this.add.image(width / 2, height / 2, 'background')
-      bg.setScrollFactor(0)
-      // 3. Este truco escala la imagen para que cubra siempre el ancho de la pantalla
-      const scaleX = width / bg.width
-      const scaleY = height / bg.height
-      const scale = Math.max(scaleX, scaleY) // Elige la escala mayor para no dejar huecos
-      bg.setScale(scale)
+      // El fondo se ha movido al estilo CSS (.container) para que los
+      // elementos HTML puedan estar entre el fondo y el personaje.
 
       // Grupo de plataformas invisibles
       const platforms = this.physics.add.staticGroup()
@@ -79,27 +75,61 @@
         .dom(width / 2, height / 2)
         .createFromHTML(titleHTML)
         .setOrigin(0.5, 0.5)
-      platforms.add(this.add.rectangle(width / 2 - 300, height / 2, 600, 200).setVisible(false))
-      platforms.add(this.add.rectangle(width / 2, height / 2 + 60, 350, 100).setVisible(false))
+
+      const t1 = this.add.rectangle(width / 2 - 300, height / 2 - 50, 600, 50).setVisible(false)
+      const t2 = this.add.rectangle(width / 2, height / 2 + 25, 320, 10).setVisible(false)
+      t1.associatedDom = titleDom
+      t2.associatedDom = titleDom
+      platforms.add(t1)
+      platforms.add(t2)
 
       // Paso 1
-      const step1Dom = this.add.dom(width / 2, 1300).createFromHTML(step1HTML)
-      platforms.add(this.add.rectangle(width / 2 + 300, 1280, 600, 550).setVisible(false))
+      const step1Dom = this.add.dom(width / 2, 950).createFromHTML(step1HTML)
+      const p1 = this.add.rectangle(width / 2 + 325, 730, 550, 20).setVisible(false)
+      p1.associatedDom = step1Dom
+      platforms.add(p1)
 
       // Paso 2
-      const step2Dom = this.add.dom(width / 2, 2300).createFromHTML(step2HTML)
-      platforms.add(this.add.rectangle(width / 2, 2300, 680, 300).setVisible(false))
+      const step2Dom = this.add.dom(width / 2, 1200).createFromHTML(step2HTML)
+      const p2 = this.add.rectangle(width / 2 - 325, 1040, 550, 20).setVisible(false)
+      p2.associatedDom = step2Dom
+      platforms.add(p2)
+
+      // Paso 3
+      const step3Dom = this.add.dom(width / 2, 1500).createFromHTML(step3HTML)
+      const p3 = this.add.rectangle(width / 2 + 325, 1340, 550, 20).setVisible(false)
+      p3.associatedDom = step3Dom
+      platforms.add(p3)
 
       // Jugador
       player = this.physics.add
-        .sprite(width / 2, 0, 'player')
-        .setSize(200, 450)
+        .sprite(width / 2 + 100, height / 2 - 55, 'player')
+        .setSize(200, 470)
         .setScale(0.3)
+        .setBounce(0) // Quitamos el rebote al personaje
 
       player.setCollideWorldBounds(true)
 
-      // Colisión con plataformas
-      this.physics.add.collider(player, platforms)
+      // Colisión con plataformas con efecto de rebote en el suelo
+      this.physics.add.collider(player, platforms, (p, platform) => {
+        // Solo si el personaje acaba de aterrizar (no estaba tocando antes)
+        const justLanded = p.body.touching.down && !p.body.wasTouching.down
+
+        if (justLanded && platform.associatedDom && !platform.associatedDom.isBouncing) {
+          platform.associatedDom.isBouncing = true
+
+          this.tweens.add({
+            targets: platform.associatedDom,
+            y: platform.associatedDom.y + 15, // Baja 15 píxeles
+            duration: 200,
+            yoyo: true, // Vuelve a su sitio
+            ease: 'Quad.easeInOut',
+            onComplete: () => {
+              platform.associatedDom.isBouncing = false
+            },
+          })
+        }
+      })
 
       // La cámara sigue al jugador instantáneamente (lerp 1) para evitar desfases y vibraciones
       this.cameras.main.startFollow(player, false, 1, 1)
@@ -153,8 +183,28 @@
 
 <style lang="scss">
   .container {
+    position: relative;
     width: 100%;
     height: 100%;
+    background-image: url('/backgrounds/banner.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    overflow: hidden;
+
+    /* Forzamos que el canvas de Phaser esté por encima de todo */
+    :global(canvas) {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      pointer-events: none; /* Los clics pasan al HTML de abajo */
+    }
+
+    /* El contenedor DOM de Phaser debe estar por debajo del canvas */
+    :global(div[style*='position: absolute']) {
+      z-index: 5 !important;
+    }
   }
 </style>
 
