@@ -5,6 +5,8 @@
   import step2HTML from '../content/game/step2.html?raw'
   import step3HTML from '../content/game/step3.html?raw'
 
+  let { gameFinished = $bindable(false) } = $props()
+
   let gameContainer
   let game
 
@@ -109,6 +111,13 @@
         .setBounce(0) // Quitamos el rebote al personaje
 
       player.setCollideWorldBounds(true)
+      player.body.onWorldBounds = true
+
+      this.physics.world.on('worldbounds', (body, up, down, left, right) => {
+        if (down && body.gameObject === player && !gameFinished) {
+          gameFinished = true
+        }
+      })
 
       // Colisión con plataformas con efecto de rebote en el suelo
       this.physics.add.collider(player, platforms, (p, platform) => {
