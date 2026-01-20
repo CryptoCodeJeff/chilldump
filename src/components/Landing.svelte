@@ -10,14 +10,26 @@
   })
 </script>
 
-<style class="scss">
+<style lang="scss">
+  @keyframes vanish-reappear {
+    0% {
+      opacity: 0;
+    }
+    50% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+
   .landing-wrapper {
     width: 100%;
     height: 100vh;
 
     &.gameFinished {
       img {
-        transition: 3s ease-in;
+        transition: 4s ease-in;
         opacity: 1;
       }
 
@@ -26,6 +38,7 @@
         height: 50vh;
         top: 24vh;
         margin: 0 auto;
+        animation: vanish-reappear 2s forwards;
       }
     }
 
@@ -41,7 +54,7 @@
     }
 
     .game-container {
-      transition: all 0.5s ease;
+      transition: all 0s ease;
       width: 100%;
       height: 100vh;
       position: relative;

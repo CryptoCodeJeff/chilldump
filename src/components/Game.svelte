@@ -4,6 +4,7 @@
   import step1HTML from '../content/game/step1.html?raw'
   import step2HTML from '../content/game/step2.html?raw'
   import step3HTML from '../content/game/step3.html?raw'
+  import socialsHTML from '../content/game/socials.html?raw'
   import areYouReady from '../content/game/areYouReady.html?raw'
   import justachilldumpHTML from '../content/game/justachilldump.html?raw'
 
@@ -64,7 +65,7 @@
       const worldHeight = 5000
 
       // Declaramos variables para los elementos que necesitan reposicionarse
-      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, areYouReadyDom, justachilldumpDom
+      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, socialsDom, areYouReadyDom, justachilldumpDom
 
       const updateResolution = () => {
         const { width: currentWidth, height: currentHeight } = this.scale
@@ -108,6 +109,10 @@
           step3Dom.setX(currentWidth / 2)
           p3.setX(currentWidth / 2 + 325)
           p3.body.updateFromGameObject()
+        }
+
+        if (socialsDom) {
+          socialsDom.setX(currentWidth / 2)
         }
 
         if (areYouReadyDom) {
@@ -158,11 +163,14 @@
       p3.associatedDom = step3Dom
       platforms.add(p3)
 
-      // Paso 4
+      // Are you ready?
       areYouReadyDom = this.add.dom(width / 2, 3000).createFromHTML(areYouReady)
 
       // Justachilldump
       justachilldumpDom = this.add.dom(width / 2, 4500).createFromHTML(justachilldumpHTML)
+
+      // Social Links (debajo de justachilldump)
+      socialsDom = this.add.dom(width / 2, 4700).createFromHTML(socialsHTML)
 
       // Jugador
       player = this.physics.add
