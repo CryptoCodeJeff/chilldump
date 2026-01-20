@@ -25,7 +25,7 @@
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 300 },
+          gravity: { y: 500 },
           debug: true,
           fixedStep: false,
         },
@@ -59,8 +59,15 @@
       this.cameras.main.setBounds(0, 0, width, worldHeight)
 
       // Fondo infinito
-      const bg = this.add.tileSprite(width / 2, worldHeight / 2, width, worldHeight, 'background')
+      // 1. Usa solo 'height' en lugar de 'worldHeight' para el fondo fijo
+      // 2. Usamos .setOrigin(0.5, 0.5) para centrarla bien
+      const bg = this.add.image(width / 2, height / 2, 'background')
       bg.setScrollFactor(0)
+      // 3. Este truco escala la imagen para que cubra siempre el ancho de la pantalla
+      const scaleX = width / bg.width
+      const scaleY = height / bg.height
+      const scale = Math.max(scaleX, scaleY) // Elige la escala mayor para no dejar huecos
+      bg.setScale(scale)
 
       // Grupo de plataformas invisibles
       const platforms = this.physics.add.staticGroup()
@@ -68,14 +75,16 @@
       // --- SECCIONES DE TEXTO ---
 
       // Título Principal
-      const titleDom = this.add.dom(width / 2, 200).createFromHTML(titleHTML)
-      // Creamos un bloque físico que coincida con el título
-      platforms.add(this.add.rectangle(width / 2, 200, width, 200).setVisible(false))
+      const titleDom = this.add
+        .dom(width / 2, height / 2)
+        .createFromHTML(titleHTML)
+        .setOrigin(0.5, 0.5)
+      platforms.add(this.add.rectangle(width / 2 - 300, height / 2, 600, 200).setVisible(false))
+      platforms.add(this.add.rectangle(width / 2, height / 2 + 60, 350, 100).setVisible(false))
 
       // Paso 1
       const step1Dom = this.add.dom(width / 2, 1300).createFromHTML(step1HTML)
-      // Creamos un bloque físico (ancho 600px como en el CSS, alto aprox 500px)
-      platforms.add(this.add.rectangle(width / 2, 1300, 680, 550).setVisible(false))
+      platforms.add(this.add.rectangle(width / 2 + 300, 1280, 600, 550).setVisible(false))
 
       // Paso 2
       const step2Dom = this.add.dom(width / 2, 2300).createFromHTML(step2HTML)
@@ -143,57 +152,12 @@
 </script>
 
 <style lang="scss">
-  .game-wrapper {
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    left: 0;
-  }
-
-  /* Estilos para los elementos in-game */
-  :global(.game-h1) {
-    color: white;
-    font-size: 80px;
-    font-weight: bold;
-    text-shadow: 5px 5px 0px black;
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    span {
-      font-size: 120px;
-    }
-  }
-
-  :global(.game-text-section) {
-    max-width: 600px;
-    color: white;
-    font-family: 'Arial', sans-serif;
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 20px;
-    border: 4px solid var(--colorText2, #ff00ff);
-
-    h2 {
-      color: white;
-      font-size: 40px;
-      font-weight: bold;
-      text-shadow: 3px 3px 0px black;
-    }
-
-    p {
-      font-size: 20px;
-      line-height: 1.4;
-      text-align: justify;
-    }
-  }
-
-  :global(canvas) {
-    display: block;
+  .container {
+    width: 100%;
+    height: 100%;
   }
 </style>
 
-<div class="game-wrapper">
+<div class="container">
   <div bind:this={gameContainer}></div>
 </div>
