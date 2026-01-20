@@ -4,6 +4,8 @@
   import step1HTML from '../content/game/step1.html?raw'
   import step2HTML from '../content/game/step2.html?raw'
   import step3HTML from '../content/game/step3.html?raw'
+  import areYouReady from '../content/game/areYouReady.html?raw'
+  import justachilldumpHTML from '../content/game/justachilldump.html?raw'
 
   let { gameFinished = $bindable(false) } = $props()
 
@@ -60,12 +62,65 @@
 
       // Creamos un mundo muy alto
       const worldHeight = 5000
-      this.physics.world.setBounds(0, 0, width, worldHeight)
-      this.cameras.main.setBounds(0, 0, width, worldHeight)
 
-      // Fondo infinito
-      // El fondo se ha movido al estilo CSS (.container) para que los
-      // elementos HTML puedan estar entre el fondo y el personaje.
+      // Declaramos variables para los elementos que necesitan reposicionarse
+      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, areYouReadyDom, justachilldumpDom
+
+      const updateResolution = () => {
+        const { width: currentWidth, height: currentHeight } = this.scale
+
+        // Calculamos el ratio horizontal antes de cambiar los límites para mantener al personaje en su sitio relativo
+        const oldWidth = this.physics.world.bounds.width
+        const playerRatioX = player ? player.x / oldWidth : 0.5
+
+        // Actualizamos límites del mundo y cámara
+        this.physics.world.setBounds(0, 0, currentWidth, worldHeight)
+        this.cameras.main.setBounds(0, 0, currentWidth, worldHeight)
+
+        // Reposicionamos al jugador según el nuevo ancho
+        if (player) {
+          player.setX(currentWidth * playerRatioX)
+        }
+
+        // Reposicionar Título (centrado)
+        if (titleDom) {
+          titleDom.setPosition(currentWidth / 2, currentHeight / 2)
+          t1.setPosition(currentWidth / 2 - 300, currentHeight / 2 - 50)
+          t1.body.updateFromGameObject()
+          t2.setPosition(currentWidth / 2, currentHeight / 2 + 25)
+          t2.body.updateFromGameObject()
+        }
+
+        // Reposicionar Pasos (centrados horizontalmente)
+        if (step1Dom) {
+          step1Dom.setX(currentWidth / 2)
+          p1.setX(currentWidth / 2 + 325)
+          p1.body.updateFromGameObject()
+        }
+
+        if (step2Dom) {
+          step2Dom.setX(currentWidth / 2)
+          p2.setX(currentWidth / 2 - 325)
+          p2.body.updateFromGameObject()
+        }
+
+        if (step3Dom) {
+          step3Dom.setX(currentWidth / 2)
+          p3.setX(currentWidth / 2 + 325)
+          p3.body.updateFromGameObject()
+        }
+
+        if (areYouReadyDom) {
+          areYouReadyDom.setX(currentWidth / 2)
+        }
+
+        if (justachilldumpDom) {
+          justachilldumpDom.setX(currentWidth / 2)
+        }
+      }
+
+      // Escuchamos el evento de redimensión de Phaser
+      this.scale.on('resize', updateResolution)
 
       // Grupo de plataformas invisibles
       const platforms = this.physics.add.staticGroup()
@@ -73,42 +128,48 @@
       // --- SECCIONES DE TEXTO ---
 
       // Título Principal
-      const titleDom = this.add
+      titleDom = this.add
         .dom(width / 2, height / 2)
         .createFromHTML(titleHTML)
         .setOrigin(0.5, 0.5)
 
-      const t1 = this.add.rectangle(width / 2 - 300, height / 2 - 50, 600, 50).setVisible(false)
-      const t2 = this.add.rectangle(width / 2, height / 2 + 25, 320, 10).setVisible(false)
+      t1 = this.add.rectangle(width / 2 - 300, height / 2 - 50, 600, 50).setVisible(false)
+      t2 = this.add.rectangle(width / 2, height / 2 + 25, 320, 10).setVisible(false)
       t1.associatedDom = titleDom
       t2.associatedDom = titleDom
       platforms.add(t1)
       platforms.add(t2)
 
       // Paso 1
-      const step1Dom = this.add.dom(width / 2, 950).createFromHTML(step1HTML)
-      const p1 = this.add.rectangle(width / 2 + 325, 730, 550, 20).setVisible(false)
+      step1Dom = this.add.dom(width / 2, 950).createFromHTML(step1HTML)
+      p1 = this.add.rectangle(width / 2 + 325, 730, 550, 20).setVisible(false)
       p1.associatedDom = step1Dom
       platforms.add(p1)
 
       // Paso 2
-      const step2Dom = this.add.dom(width / 2, 1200).createFromHTML(step2HTML)
-      const p2 = this.add.rectangle(width / 2 - 325, 1040, 550, 20).setVisible(false)
+      step2Dom = this.add.dom(width / 2, 1200).createFromHTML(step2HTML)
+      p2 = this.add.rectangle(width / 2 - 325, 1040, 550, 20).setVisible(false)
       p2.associatedDom = step2Dom
       platforms.add(p2)
 
       // Paso 3
-      const step3Dom = this.add.dom(width / 2, 1500).createFromHTML(step3HTML)
-      const p3 = this.add.rectangle(width / 2 + 325, 1340, 550, 20).setVisible(false)
+      step3Dom = this.add.dom(width / 2, 1500).createFromHTML(step3HTML)
+      p3 = this.add.rectangle(width / 2 + 325, 1340, 550, 20).setVisible(false)
       p3.associatedDom = step3Dom
       platforms.add(p3)
+
+      // Paso 4
+      areYouReadyDom = this.add.dom(width / 2, 3000).createFromHTML(areYouReady)
+
+      // Justachilldump
+      justachilldumpDom = this.add.dom(width / 2, 4500).createFromHTML(justachilldumpHTML)
 
       // Jugador
       player = this.physics.add
         .sprite(width / 2 + 100, height / 2 - 55, 'player')
         .setSize(200, 470)
         .setScale(0.3)
-        .setBounce(0) // Quitamos el rebote al personaje
+        .setBounce(0)
 
       player.setCollideWorldBounds(true)
       player.body.onWorldBounds = true
@@ -119,9 +180,8 @@
         }
       })
 
-      // Colisión con plataformas con efecto de rebote en el suelo
+      // Colisión con plataformas
       this.physics.add.collider(player, platforms, (p, platform) => {
-        // Solo si el personaje acaba de aterrizar (no estaba tocando antes)
         const justLanded = p.body.touching.down && !p.body.wasTouching.down
 
         if (justLanded && platform.associatedDom && !platform.associatedDom.isBouncing) {
@@ -129,9 +189,9 @@
 
           this.tweens.add({
             targets: platform.associatedDom,
-            y: platform.associatedDom.y + 15, // Baja 15 píxeles
+            y: platform.associatedDom.y + 15,
             duration: 200,
-            yoyo: true, // Vuelve a su sitio
+            yoyo: true,
             ease: 'Quad.easeInOut',
             onComplete: () => {
               platform.associatedDom.isBouncing = false
@@ -151,6 +211,7 @@
         frameRate: 5,
         repeat: -1,
       })
+      updateResolution()
     }
 
     function update() {

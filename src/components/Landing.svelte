@@ -15,32 +15,43 @@
     width: 100%;
     height: 100vh;
 
+    &.gameFinished {
+      img {
+        transition: 3s ease-in;
+        opacity: 1;
+      }
+
+      .game-container {
+        width: 42%;
+        height: 50vh;
+        top: 24vh;
+        margin: 0 auto;
+      }
+    }
+
     img {
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      z-index: 1;
+      z-index: 100;
       object-fit: cover;
+      opacity: 0;
     }
 
     .game-container {
-      transition: 0.3s ease;
+      transition: all 0.5s ease;
       width: 100%;
       height: 100vh;
       position: relative;
-
-      &.gameFinished {
-        transform: scale(0.4);
-      }
     }
   }
 </style>
 
-<div class="landing-wrapper">
-  <div class="game-container" class:gameFinished>
-    <img src="/backgrounds/transparentTV.png" alt="" />
+<div class="landing-wrapper" class:gameFinished>
+  <img src="/backgrounds/transparentTV.png" alt="" />
+  <div class="game-container">
     <Game bind:gameFinished />
   </div>
 </div>
