@@ -8,7 +8,7 @@
   import areYouReady from '../content/game/areYouReady.html?raw'
   import justachilldumpHTML from '../content/game/justachilldump.html?raw'
 
-  let { gameFinished = $bindable(false) } = $props()
+  let { gameFinished = $bindable(false), calendarOpened = $bindable(false) } = $props()
 
   let gameContainer
   let game
@@ -171,6 +171,13 @@
 
       // Social Links (debajo de justachilldump)
       socialsDom = this.add.dom(width / 2, 4700).createFromHTML(socialsHTML)
+
+      socialsDom.addListener('click')
+      socialsDom.on('click', (event) => {
+        if (event.target.closest('#calendar-btn')) {
+          calendarOpened = true
+        }
+      })
 
       // Jugador
       player = this.physics.add
