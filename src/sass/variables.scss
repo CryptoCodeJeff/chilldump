@@ -1,7 +1,8 @@
 @use 'src/sass/mixins.scss' as *;
 
 :root {
-  --colorPrimary: #bb7900; // #922412; // #0e816c;
+  --colorPrimary: #bb7900;
+  --colorPrimaryRgb: 187, 121, 0; // #bb7900 in RGB
   --colorSecondary: #ffffff;
   --colorNeutral: #f7f7f7;
 

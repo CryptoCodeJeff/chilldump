@@ -74,14 +74,25 @@
 
     .calendar {
       position: absolute;
-      display: none;
+      display: flex;
+      visibility: hidden;
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(0.95);
+      transition:
+        opacity 0.3s ease,
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        visibility 0.3s;
 
       &.opened {
-        display: flex;
+        visibility: visible;
+        opacity: 1;
+        pointer-events: all;
+        transform: scale(1);
       }
 
-      background-color: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(15px);
       width: 42%;
       height: 50vh;
       top: 24vh;
@@ -91,17 +102,52 @@
       z-index: 99;
       padding: 2rem;
       border-radius: 20px;
-      display: flex;
+      border: 1px solid rgba(var(--colorPrimaryRgb), 0.3);
+      box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
       flex-direction: column;
       gap: 1.5rem;
+
+      .close-btn {
+        position: absolute;
+        top: 1.25rem;
+        right: 1.25rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 1001;
+
+        &:hover {
+          transform: rotate(90deg) scale(1.1);
+          background: rgba(var(--colorPrimaryRgb), 0.2);
+          border-color: var(--colorPrimary);
+          color: var(--colorPrimary);
+          box-shadow: 0 0 15px rgba(var(--colorPrimaryRgb), 0.4);
+        }
+
+        &:active {
+          transform: rotate(90deg) scale(0.95);
+        }
+      }
 
       h3 {
         margin: 0;
         text-align: center;
-        font-size: 2rem;
+        font-size: 2.5rem;
         color: white;
         text-transform: uppercase;
-        letter-spacing: 2px;
+        letter-spacing: 4px;
+        font-weight: 900;
+        text-shadow: 0 0 20px rgba(var(--colorPrimaryRgb), 0.5);
       }
       .content {
         display: flex;
@@ -110,54 +156,54 @@
 
         .week-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+          justify-content: center;
+          grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
           width: 100%;
-          gap: 5px;
+          gap: 8px;
 
           .week-box {
             aspect-ratio: 1;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: bold;
-            color: rgba(255, 255, 255, 0.5);
-            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.4);
+            transition: all 0.2s ease;
             cursor: pointer;
+            font-size: 1.1rem;
 
             &:hover {
               background: var(--colorPrimary);
               color: white;
-              box-shadow: 0 0 15px var(--colorPrimary);
+              border-color: transparent;
+              box-shadow: 0 0 20px rgba(var(--colorPrimaryRgb), 0.5);
+              transform: translateY(-2px);
             }
 
             &.active {
               background: var(--colorPrimary);
               color: white;
-              border-color: var(--colorPrimary);
+              border-color: transparent;
+              box-shadow: 0 0 25px rgba(var(--colorPrimaryRgb), 0.6);
             }
 
             &.current {
               border: 2px solid white;
+              color: white;
             }
 
             &.completed {
-              border-color: var(--colorPrimary);
-              color: white;
-              position: relative;
-
+              opacity: 0.6;
               &::after {
-                content: '';
+                content: '✓';
                 position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: var(--colorPrimary);
-                opacity: 0.2;
-                border-radius: inherit;
+                font-size: 0.7rem;
+                bottom: 2px;
+                right: 4px;
+                color: var(--colorPrimary);
               }
             }
           }
@@ -167,9 +213,27 @@
           width: 100%;
           height: 100%;
           min-height: 27vh;
+          background: rgba(255, 255, 255, 0.02);
+          padding: 1.5rem;
+          border-radius: 15px;
 
           p {
-            font-size: 30px;
+            font-size: 24px;
+            margin: 0.5rem 0;
+            color: rgba(255, 255, 255, 0.7);
+
+            span {
+              color: white;
+              font-weight: bold;
+            }
+          }
+
+          a {
+            text-decoration: none;
+            p:hover span {
+              color: var(--colorPrimary);
+              text-decoration: underline;
+            }
           }
         }
       }
@@ -200,6 +264,22 @@
   <img src="/backgrounds/transparentTV.png" alt="" />
 
   <div class="calendar" class:opened={calendarOpened}>
+    <button class="close-btn" onclick={() => (calendarOpened = false)} aria-label="Close calendar">
+      <svg
+        viewBox="0 0 24 24"
+        width="32"
+        height="32"
+        stroke="currentColor"
+        stroke-width="3"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
     <h3>Season Q1</h3>
 
     <div class="content">
@@ -230,7 +310,6 @@
           </button>
         {/each}
       </div>
-      <button class="close-btn" onclick={() => (calendarOpened = false)}>Close</button>
     </div>
   </div>
 
