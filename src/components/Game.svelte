@@ -12,6 +12,8 @@
 
   let gameContainer
   let game
+  let shitsCollected = $state(0)
+  let totalShits = $state(19)
 
   onMount(async () => {
     const Phaser = (await import('phaser')).default
@@ -33,7 +35,7 @@
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 400 },
+          gravity: { y: 200 },
           debug: false,
           fixedStep: false,
         },
@@ -56,6 +58,33 @@
       this.load.image('playerWalk', '/sprites/walk.png')
       this.load.image('playerWalk2', '/sprites/walk2.png')
       this.load.image('playerJump', '/sprites/jump.png')
+      this.load.image('cloud', '/sprites/cloud.png')
+
+      const shitNames = [
+        'bullshit',
+        'carrot',
+        'cow',
+        'cute',
+        'death',
+        'doge',
+        'fire',
+        'funny',
+        'gay',
+        'golden',
+        'ice',
+        'marciano',
+        'pink',
+        'rainbow',
+        'rare',
+        'robot',
+        'shark',
+        'shiba',
+        'weird',
+      ]
+
+      shitNames.forEach((name) => {
+        this.load.image(`shit_${name}`, `/sprites/shits/${name}.gif`)
+      })
     }
 
     function create() {
@@ -65,7 +94,7 @@
       const worldHeight = 5000
 
       // Declaramos variables para los elementos que necesitan reposicionarse
-      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, socialsDom, areYouReadyDom, justachilldumpDom
+      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, socialsDom, areYouReadyDom, justachilldumpDom, cloudSprite, pCloud
 
       const updateResolution = () => {
         const { width: currentWidth, height: currentHeight } = this.scale
@@ -122,6 +151,23 @@
         if (justachilldumpDom) {
           justachilldumpDom.setX(currentWidth / 2)
         }
+
+        if (cloudSprite) {
+          cloudSprite.setX(currentWidth / 2)
+          pCloud.setX(currentWidth / 2)
+          pCloud.body.updateFromGameObject()
+        }
+
+        // Reposicionar todos los shits proporcionalmente al centro
+        shitsGroup.getChildren().forEach((shit) => {
+          if (shit.xOffset !== undefined) {
+            const newX = currentWidth / 2 + shit.xOffset
+            shit.setX(newX)
+            if (shit.associatedDom) {
+              shit.associatedDom.setX(newX)
+            }
+          }
+        })
       }
 
       // Escuchamos el evento de redimensión de Phaser
@@ -147,7 +193,7 @@
 
       // Paso 1
       step1Dom = this.add.dom(width / 2, 950).createFromHTML(step1HTML)
-      p1 = this.add.rectangle(width / 2 + 325, 730, 550, 20).setVisible(false)
+      p1 = this.add.rectangle(width / 2 + 325, 690, 550, 20).setVisible(false)
       p1.associatedDom = step1Dom
       platforms.add(p1)
 
@@ -159,9 +205,18 @@
 
       // Paso 3
       step3Dom = this.add.dom(width / 2, 1500).createFromHTML(step3HTML)
-      p3 = this.add.rectangle(width / 2 + 325, 1340, 550, 20).setVisible(false)
+      p3 = this.add.rectangle(width / 2 + 325, 1370, 550, 20).setVisible(false)
       p3.associatedDom = step3Dom
       platforms.add(p3)
+
+      // Cloud
+      cloudSprite = this.add
+        .sprite(width / 2, 2200, 'cloud')
+        .setScale(0.5)
+        .setAlpha(0.8)
+      pCloud = this.add.rectangle(width / 2, 2200, 400, 40).setVisible(false)
+      pCloud.associatedDom = cloudSprite
+      platforms.add(pCloud)
 
       // Are you ready?
       areYouReadyDom = this.add.dom(width / 2, 3000).createFromHTML(areYouReady)
@@ -179,20 +234,108 @@
         }
       })
 
+      // Grupo de Shits (coleccionables)
+      const shitsGroup = this.physics.add.group()
+      const shitNames = [
+        'golden',
+        'bullshit',
+        'cow',
+        'cute',
+        'death',
+        'shark',
+        'doge',
+        'fire',
+        'funny',
+        'gay',
+        'ice',
+        'marciano',
+        'pink',
+        'rainbow',
+        'rare',
+        'robot',
+        'carrot',
+        'shiba',
+        'weird',
+      ]
+
+      // Repartimos los shits por el mundo
+      // Los pondremos cerca de las plataformas o en el camino
+      const shitPositions = [
+        { x: width / 2 - 500, y: height / 2 - 200 }, // golden
+        { x: width / 2 + 400, y: 200 }, // bullshit
+        { x: width / 2 + 500, y: 600 }, // cow
+        { x: width / 2 - 500, y: 600 }, // cute
+        { x: width / 2 + 500, y: 1150 }, // death
+        { x: width / 2 + 150, y: 1300 }, // shark
+        { x: width / 2 - 200, y: 1450 }, // doge
+        { x: width / 2, y: 1700 }, // fire
+        { x: width / 2 - 250, y: 2400 }, // funny
+        { x: width / 2 + 150, y: 2200 }, // gay
+        { x: width / 2 - 450, y: 1800 }, // ice
+        { x: width / 2 + 450, y: 1800 }, // marciano
+        { x: width / 2 - 50, y: 2900 }, // pink
+        { x: width / 2 + 50, y: 3200 }, // rainbow
+        { x: width / 2, y: 3600 }, // rare
+        { x: width / 2, y: 4000 }, // robot
+        { x: width / 2 - 300, y: 4850 }, // carrot
+        { x: width / 2 + 300, y: 4850 }, // shiba
+      ]
+
+      shitPositions.forEach((pos, index) => {
+        if (index < shitNames.length) {
+          const name = shitNames[index]
+          // Creamos un sensor físico (invisible) para la colisión
+          const shitSensor = shitsGroup.create(pos.x, pos.y, `shit_${name}`)
+          shitSensor.xOffset = pos.x - width / 2 // Guardamos la distancia al centro original
+          shitSensor.setScale(0.2)
+          shitSensor.setVisible(false) // No queremos ver el sprite estático
+          shitSensor.body.setAllowGravity(false)
+
+          // Creamos el elemento DOM para ver el GIF animado
+          const shitDom = this.add
+            .dom(pos.x, pos.y)
+            .setScale(1.5)
+            .createFromHTML(`<img src="/sprites/shits/${name}.gif" style="width: 50px; height: 50px; object-fit: contain;" />`)
+
+          // Vinculamos el DOM al sensor para poder destruirlo después
+          shitSensor.associatedDom = shitDom
+
+          // Animación simple de flotado para ambos
+          this.tweens.add({
+            targets: [shitSensor, shitDom],
+            y: pos.y - 20,
+            duration: 1500 + Math.random() * 1000,
+            yoyo: true,
+            repeat: -1,
+            ease: 'Sine.easeInOut',
+          })
+        }
+      })
+
       // Jugador
       player = this.physics.add
         .sprite(width / 2 + 100, height / 2 - 55, 'player')
-        .setSize(200, 470)
+        .setSize(260, 450)
         .setScale(0.3)
         .setBounce(0)
 
       player.setCollideWorldBounds(true)
       player.body.onWorldBounds = true
+      player.setDrag(100, 0) // Añadimos algo de resistencia al aire horizontal
 
       this.physics.world.on('worldbounds', (body, up, down, left, right) => {
         if (down && body.gameObject === player && !gameFinished) {
           gameFinished = true
         }
+      })
+
+      // Recolección de shits
+      this.physics.add.overlap(player, shitsGroup, (player, shit) => {
+        if (shit.associatedDom) {
+          shit.associatedDom.destroy()
+        }
+        shit.destroy()
+        shitsCollected++
       })
 
       // Colisión con plataformas
@@ -245,7 +388,7 @@
 
       // Si no tocamos nada, caemos suavemente o podemos saltar
       if (cursors.up.isDown && onGround) {
-        player.setVelocityY(-500)
+        player.setVelocityY(-400)
       }
 
       // Animaciones
@@ -267,6 +410,32 @@
 </script>
 
 <style lang="scss">
+  .counter {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    z-index: 100;
+    color: white;
+    font-family: 'Inter', sans-serif;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+
+    img {
+      width: 30px;
+      height: 30px;
+      object-fit: contain;
+    }
+  }
+
   .container {
     position: relative;
     width: 100%;
@@ -294,5 +463,9 @@
 </style>
 
 <div class="container">
+  <div class="counter">
+    <img src="/sprites/shits/golden.gif" alt="shit" />
+    <span>{shitsCollected} / {totalShits}</span>
+  </div>
   <div bind:this={gameContainer}></div>
 </div>
