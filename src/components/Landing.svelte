@@ -1,5 +1,6 @@
 <script>
   import Game from './Game.svelte'
+  import Menu from './Menu.svelte'
 
   let gameFinished = $state(false)
 
@@ -20,18 +21,20 @@
   ])
 
   const now = new Date()
-  let currentWeekIndex = 0
+  let initialWeekIndex = 0
   for (let i = 0; i < weeks.length; i++) {
     // La semana actual es la que termina el próximo domingo
     if (now <= new Date(weeks[i].date + ' 20:00')) {
-      currentWeekIndex = i
+      initialWeekIndex = i
       break
     }
   }
 
-  let selectedIndex = $state(currentWeekIndex)
+  let currentWeekIndex = $state(initialWeekIndex)
+  let selectedIndex = $state(initialWeekIndex)
 
   let calendarOpened = $state(false)
+  let easterEggOpened = $state(false)
 
   $effect(() => {
     if (gameFinished) {
@@ -221,11 +224,6 @@
             font-size: 24px;
             margin: 0.5rem 0;
             color: rgba(255, 255, 255, 0.7);
-
-            span {
-              color: white;
-              font-weight: bold;
-            }
           }
 
           a {
@@ -261,7 +259,40 @@
 </style>
 
 <div class="landing-wrapper" class:gameFinished>
+  <Menu bind:calendarOpened />
   <img src="/backgrounds/transparentTV.png" alt="" />
+
+  <div class="calendar" class:opened={easterEggOpened}>
+    <button class="close-btn" onclick={() => (easterEggOpened = false)} aria-label="Close easter egg">
+      <svg
+        viewBox="0 0 24 24"
+        width="32"
+        height="32"
+        stroke="currentColor"
+        stroke-width="3"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+
+    <h3>1 Year Coin</h3>
+
+    <div class="content">
+      <div class="data">
+        <p>Congratulations! You've found the <span>Easter Egg</span>.</p>
+        <p>This coin represents the <span>1 Year Anniversary</span> of the project.</p>
+        <p>
+          <a href="https://dumpfun.io/dumpflow/88nNskUmu3ZybwWEHeBRz2nNoFYzQd3kdesHdPbNdump" target="_blank"
+            >CA: <span>88nNskUmu3ZybwWEHeBRz2nNoFYzQd3kdesHdPbNdump</span></a
+          >
+        </p>
+      </div>
+    </div>
+  </div>
 
   <div class="calendar" class:opened={calendarOpened}>
     <button class="close-btn" onclick={() => (calendarOpened = false)} aria-label="Close calendar">
@@ -314,6 +345,6 @@
   </div>
 
   <div class="game-container">
-    <Game bind:gameFinished bind:calendarOpened />
+    <Game bind:gameFinished bind:calendarOpened bind:easterEggOpened />
   </div>
 </div>

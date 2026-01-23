@@ -8,7 +8,7 @@
   import areYouReady from '../content/game/areYouReady.html?raw'
   import justachilldumpHTML from '../content/game/justachilldump.html?raw'
 
-  let { gameFinished = $bindable(false), calendarOpened = $bindable(false) } = $props()
+  let { gameFinished = $bindable(false), calendarOpened = $bindable(false), easterEggOpened = $bindable(false) } = $props()
 
   let gameContainer
   let game
@@ -57,8 +57,10 @@
       this.load.image('player', '/sprites/normal.png')
       this.load.image('playerWalk', '/sprites/walk.png')
       this.load.image('playerWalk2', '/sprites/walk2.png')
-      this.load.image('playerJump', '/sprites/jump.png')
-      this.load.image('cloud', '/sprites/cloud.png')
+      this.load.image('playerJump', '/sprites/jump2.png')
+      this.load.image('playerJump2', '/sprites/jump.png')
+      this.load.image('playerSit', '/sprites/sit.png')
+      this.load.image('sofa', '/sprites/sofa.png')
 
       const shitNames = [
         'bullshit',
@@ -94,7 +96,7 @@
       const worldHeight = 5000
 
       // Declaramos variables para los elementos que necesitan reposicionarse
-      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, socialsDom, areYouReadyDom, justachilldumpDom, cloudSprite, pCloud
+      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, socialsDom, areYouReadyDom, justachilldumpDom, sofaSprite, pSofa
 
       const updateResolution = () => {
         const { width: currentWidth, height: currentHeight } = this.scale
@@ -152,10 +154,10 @@
           justachilldumpDom.setX(currentWidth / 2)
         }
 
-        if (cloudSprite) {
-          cloudSprite.setX(currentWidth / 2)
-          pCloud.setX(currentWidth / 2)
-          pCloud.body.updateFromGameObject()
+        if (sofaSprite) {
+          sofaSprite.setX(currentWidth / 2)
+          pSofa.setX(currentWidth / 2)
+          pSofa.body.updateFromGameObject()
         }
 
         // Reposicionar todos los shits proporcionalmente al centro
@@ -209,28 +211,47 @@
       p3.associatedDom = step3Dom
       platforms.add(p3)
 
-      // Cloud
-      cloudSprite = this.add
-        .sprite(width / 2, 2200, 'cloud')
-        .setScale(0.5)
-        .setAlpha(0.8)
-      pCloud = this.add.rectangle(width / 2, 2200, 400, 40).setVisible(false)
-      pCloud.associatedDom = cloudSprite
-      platforms.add(pCloud)
+      // Sofa
+      sofaSprite = this.add.sprite(width / 2, 2200, 'sofa').setScale(0.8)
+      pSofa = this.add.rectangle(width / 2, 2200, 300, 40).setVisible(false)
+      pSofa.associatedDom = sofaSprite
+      platforms.add(pSofa)
+
+      // Animación de flotado compleja (levitación + vibración jet)
+      this.tweens.add({
+        targets: sofaSprite,
+        y: 2180,
+        duration: 2000,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
+
+      this.tweens.add({
+        targets: sofaSprite,
+        x: '+=2',
+        duration: 50,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut',
+      })
 
       // Are you ready?
       areYouReadyDom = this.add.dom(width / 2, 3000).createFromHTML(areYouReady)
 
       // Justachilldump
-      justachilldumpDom = this.add.dom(width / 2, 4500).createFromHTML(justachilldumpHTML)
+      justachilldumpDom = this.add.dom(width / 2, 4560).createFromHTML(justachilldumpHTML)
 
       // Social Links (debajo de justachilldump)
-      socialsDom = this.add.dom(width / 2, 4700).createFromHTML(socialsHTML)
+      socialsDom = this.add.dom(width / 2, 4750).createFromHTML(socialsHTML)
 
       socialsDom.addListener('click')
       socialsDom.on('click', (event) => {
         if (event.target.closest('#calendar-btn')) {
           calendarOpened = true
+        }
+        if (event.target.closest('#easteregg-btn')) {
+          easterEggOpened = true
         }
       })
 
@@ -279,6 +300,7 @@
         { x: width / 2, y: 4000 }, // robot
         { x: width / 2 - 300, y: 4850 }, // carrot
         { x: width / 2 + 300, y: 4850 }, // shiba
+        { x: width / 2, y: 4920 }, // weird
       ]
 
       shitPositions.forEach((pos, index) => {
@@ -297,17 +319,34 @@
             .setScale(1.5)
             .createFromHTML(`<img src="/sprites/shits/${name}.gif" style="width: 50px; height: 50px; object-fit: contain;" />`)
 
+          // Ocultar inicialmente
+          shitDom.setAlpha(0)
+          shitSensor.setActive(false)
+
           // Vinculamos el DOM al sensor para poder destruirlo después
           shitSensor.associatedDom = shitDom
 
-          // Animación simple de flotado para ambos
-          this.tweens.add({
-            targets: [shitSensor, shitDom],
-            y: pos.y - 20,
-            duration: 1500 + Math.random() * 1000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut',
+          // Retraso de 1 segundo para aparecer
+          this.time.delayedCall(2000, () => {
+            // Animación de aparición
+            this.tweens.add({
+              targets: shitDom,
+              alpha: 1,
+              duration: 500,
+              onComplete: () => {
+                shitSensor.setActive(true)
+              },
+            })
+
+            // Animación simple de flotado para ambos
+            this.tweens.add({
+              targets: [shitSensor, shitDom],
+              y: pos.y - 20,
+              duration: 1500 + Math.random() * 1000,
+              yoyo: true,
+              repeat: -1,
+              ease: 'Sine.easeInOut',
+            })
           })
         }
       })
@@ -336,6 +375,13 @@
         }
         shit.destroy()
         shitsCollected++
+
+        if (shitsCollected >= totalShits) {
+          const btn = socialsDom.getChildByID('easteregg-btn')
+          if (btn) {
+            btn.style.display = 'flex'
+          }
+        }
       })
 
       // Colisión con plataformas
@@ -357,6 +403,9 @@
           })
         }
       })
+
+      // Variables para el doble salto
+      player.canDoubleJump = false
 
       // La cámara sigue al jugador instantáneamente (lerp 1) para evitar desfases y vibraciones
       this.cameras.main.startFollow(player, false, 1, 1)
@@ -386,20 +435,49 @@
         player.setVelocityX(0)
       }
 
-      // Si no tocamos nada, caemos suavemente o podemos saltar
-      if (cursors.up.isDown && onGround) {
-        player.setVelocityY(-400)
+      // Lógica de salto y doble salto
+      const isJumpJustDown = Phaser.Input.Keyboard.JustDown(cursors.up) || Phaser.Input.Keyboard.JustDown(cursors.space)
+
+      if (onGround) {
+        player.canDoubleJump = true
+        player.isDoubleJumping = false
+        if (isJumpJustDown) {
+          player.setVelocityY(-200)
+        }
+      } else if (isJumpJustDown && player.canDoubleJump) {
+        player.setVelocityY(-250)
+        player.canDoubleJump = false
+        player.isDoubleJumping = true
       }
 
       // Animaciones
-      if (!onGround) {
+      if (cursors.down.isDown && onGround) {
         player.anims.stop()
-        player.setTexture('playerJump')
-      } else if (moving) {
-        player.play('walk', true)
+        player.setTexture('playerSit')
+        player.setScale(0.3)
+        player.body.setSize(260, 300)
+        player.body.setOffset(0, 150)
       } else {
-        player.anims.stop()
-        player.setTexture('player')
+        player.body.setSize(260, 450)
+        player.body.setOffset(0, 0)
+
+        if (!onGround) {
+          player.anims.stop()
+          if (player.isDoubleJumping) {
+            player.setTexture('playerJump2')
+            player.setScale(0.3) // Ahora es jump.png
+          } else {
+            player.setTexture('playerJump')
+            player.setScale(0.3) // Ahora es jump2.png
+          }
+        } else if (moving) {
+          player.play('walk', true)
+          player.setScale(0.3)
+        } else {
+          player.anims.stop()
+          player.setTexture('player')
+          player.setScale(0.3)
+        }
       }
     }
   })
@@ -410,32 +488,6 @@
 </script>
 
 <style lang="scss">
-  .counter {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    padding: 10px 20px;
-    border-radius: 50px;
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    z-index: 100;
-    color: white;
-    font-family: 'Inter', sans-serif;
-    font-weight: bold;
-    font-size: 1.2rem;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-
-    img {
-      width: 30px;
-      height: 30px;
-      object-fit: contain;
-    }
-  }
-
   .container {
     position: relative;
     width: 100%;
@@ -463,9 +515,5 @@
 </style>
 
 <div class="container">
-  <div class="counter">
-    <img src="/sprites/shits/golden.gif" alt="shit" />
-    <span>{shitsCollected} / {totalShits}</span>
-  </div>
   <div bind:this={gameContainer}></div>
 </div>
