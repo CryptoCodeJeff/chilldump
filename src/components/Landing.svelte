@@ -5,11 +5,11 @@
   let gameFinished = $state(false)
 
   let weeks = $state([
-    { date: '04 Jan 2026', ca: '-', grow: '-' },
+    /*{ date: '04 Jan 2026', ca: '-', grow: '-' },
     { date: '11 Jan 2026', ca: '-', grow: '-' },
     { date: '18 Jan 2026', ca: '-', grow: '-' },
-    { date: '25 Jan 2026', ca: '-', grow: '-' },
-    { date: '01 Feb 2026', ca: '-', grow: '-' },
+    { date: '25 Jan 2026', ca: '-', grow: '-' },*/
+    { date: '01 Feb 2026', ca: '6M7H3XMi97N4jd4prchiEbRdtZT5wzYJwg2w3PMudump', grow: '0%' },
     { date: '08 Feb 2026', ca: '-', grow: '-' },
     { date: '15 Feb 2026', ca: '-', grow: '-' },
     { date: '22 Feb 2026', ca: '-', grow: '-' },
@@ -36,6 +36,7 @@
   let calendarOpened = $state(false)
   let easterEggOpened = $state(false)
   let showControls = $state(true)
+  let audioMuted = $state(false)
 
   function handleKeyDown(e) {
     if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) {
@@ -326,7 +327,7 @@
 </style>
 
 <div class="landing-wrapper" class:gameFinished>
-  <Menu bind:calendarOpened />
+  <Menu bind:calendarOpened bind:audioMuted />
   <img src="/backgrounds/transparentTV.png" alt="" />
 
   {#if showControls}
@@ -427,6 +428,6 @@
   </div>
 
   <div class="game-container">
-    <Game bind:gameFinished bind:calendarOpened bind:easterEggOpened />
+    <Game bind:gameFinished bind:calendarOpened bind:easterEggOpened bind:audioMuted />
   </div>
 </div>

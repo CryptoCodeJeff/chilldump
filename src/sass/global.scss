@@ -47,8 +47,9 @@ p {
   align-items: center;
   justify-content: center;
 
-  a, button {
-    transition: .3s ease-in-out;
+  a,
+  button {
+    transition: 0.3s ease-in-out;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -57,18 +58,28 @@ p {
     text-align: center;
     font-weight: bold;
 
-
-    &:hover{
+    &:hover {
       transform: translateY(-10px);
       color: var(--colorPrimary);
     }
-
   }
 
-   img {
+  img {
     width: 100px;
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
-   }
+  }
+
+  .mute-icon {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    backdrop-filter: blur(5px);
+  }
 }

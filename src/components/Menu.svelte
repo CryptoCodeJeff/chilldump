@@ -1,5 +1,5 @@
 <script>
-  let { calendarOpened = $bindable(false) } = $props()
+  let { calendarOpened = $bindable(false), audioMuted = $bindable(false) } = $props()
 
   const links = [
     { name: 'Official X', href: 'https://x.com/justachilldump', icon: '/x.png' },
@@ -132,6 +132,11 @@
       <button class="nav-item calendar-trigger" onclick={() => (calendarOpened = true)}>
         <img src="/calendar.png" alt="Calendar" class="nav-icon" />
         <span>Roadmap</span>
+      </button>
+      <button class="nav-item" onclick={() => (audioMuted = !audioMuted)}>
+        <span class="nav-icon" style="font-size: 24px; display: flex; align-items: center; justify-content: center;">
+          {audioMuted ? '🔇' : '🔊'}
+        </span>
       </button>
     </div>
   </div>

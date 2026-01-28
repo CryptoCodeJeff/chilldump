@@ -8,7 +8,12 @@
   import areYouReady from '../content/game/areYouReady.html?raw'
   import justachilldumpHTML from '../content/game/justachilldump.html?raw'
 
-  let { gameFinished = $bindable(false), calendarOpened = $bindable(false), easterEggOpened = $bindable(false) } = $props()
+  let {
+    gameFinished = $bindable(false),
+    calendarOpened = $bindable(false),
+    easterEggOpened = $bindable(false),
+    audioMuted = $bindable(false),
+  } = $props()
 
   let gameContainer
   let game
@@ -51,6 +56,7 @@
 
     let player, playerSprite
     let cursors, wasdKeys
+    let sofaSound, jumpSound, fartSound
 
     function preload() {
       this.load.image('background', '/backgrounds/banner.png')
@@ -61,6 +67,9 @@
       this.load.image('playerJump2', '/sprites/jump.png')
       this.load.image('playerSit', '/sprites/sit.png')
       this.load.image('sofa', '/sprites/sofa.png')
+      this.load.audio('sofaSound', '/sounds/cg8bit.wav')
+      this.load.audio('jumpSound', '/sounds/jump.mp3')
+      this.load.audio('fartSound', '/sounds/fart.wav')
 
       const shitNames = [
         'bullshit',
@@ -255,6 +264,9 @@
         }
       })
 
+      // Sincronizar estado inicial de audio
+      this.sound.mute = audioMuted
+
       // Grupo de Shits (coleccionables)
       const shitsGroup = this.physics.add.group()
       const shitNames = [
@@ -383,6 +395,7 @@
         }
         shit.destroy()
         shitsCollected++
+        fartSound.play()
 
         if (shitsCollected >= totalShits) {
           const btn = socialsDom.getChildByID('easteregg-btn')
@@ -392,9 +405,18 @@
         }
       })
 
+      // Preparamos sonidos
+      sofaSound = this.sound.add('sofaSound', { loop: false })
+      jumpSound = this.sound.add('jumpSound', { loop: false })
+      fartSound = this.sound.add('fartSound', { loop: false })
+
       // Colisión con plataformas
       this.physics.add.collider(player, platforms, (p, platform) => {
         const justLanded = p.body.touching.down && !p.body.wasTouching.down
+
+        if (justLanded && platform === pSofa && !sofaSound.isPlaying) {
+          sofaSound.play()
+        }
 
         if (justLanded && platform.associatedDom && !platform.associatedDom.isBouncing) {
           platform.associatedDom.isBouncing = true
@@ -462,6 +484,7 @@
         player.setVelocityY(-350)
         player.canDoubleJump = false
         player.isDoubleJumping = true
+        jumpSound.play()
       }
 
       // Sincronización base del sprite con el cuerpo
@@ -502,6 +525,12 @@
       // Aplicar posición final con offset
       playerSprite.y = player.y + visualOffsetY
     }
+
+    $effect(() => {
+      if (game && game.sound) {
+        game.sound.mute = audioMuted
+      }
+    })
   })
 
   onDestroy(() => {
