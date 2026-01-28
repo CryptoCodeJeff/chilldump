@@ -49,8 +49,8 @@
 
     game = new Phaser.Game(config)
 
-    let player
-    let cursors
+    let player, playerSprite
+    let cursors, wasdKeys
 
     function preload() {
       this.load.image('background', '/backgrounds/banner.png')
@@ -351,12 +351,20 @@
         }
       })
 
-      // Jugador
+      // Jugador (Cuerpo físico invisible)
       player = this.physics.add
-        .sprite(width / 2 + 100, height / 2 - 55, 'player')
-        .setSize(260, 450)
+        .sprite(width / 2 + 100, 0, 'player')
         .setScale(0.3)
         .setBounce(0)
+        .setVisible(false)
+
+      // Sprite Visual que sigue al cuerpo
+      playerSprite = this.add.sprite(player.x, player.y, 'player').setScale(0.3)
+
+      // Ajustamos el tamaño de la hitbox y el offset para centrarla
+      // Dimensiones originales normal.png: 408x612
+      player.body.setSize(280, 580)
+      player.body.setOffset(64, 20)
 
       player.setCollideWorldBounds(true)
       player.body.onWorldBounds = true
@@ -411,6 +419,7 @@
       this.cameras.main.startFollow(player, false, 1, 1)
 
       cursors = this.input.keyboard.createCursorKeys()
+      wasdKeys = this.input.keyboard.addKeys('W,A,S,D')
 
       this.anims.create({
         key: 'walk',
@@ -423,62 +432,75 @@
 
     function update() {
       const onGround = player.body.blocked.down
-      const moving = cursors.left.isDown || cursors.right.isDown
+      const leftDown = cursors.left.isDown || wasdKeys.A.isDown
+      const rightDown = cursors.right.isDown || wasdKeys.D.isDown
+      const upJustDown =
+        Phaser.Input.Keyboard.JustDown(cursors.up) ||
+        Phaser.Input.Keyboard.JustDown(wasdKeys.W) ||
+        Phaser.Input.Keyboard.JustDown(cursors.space)
+      const downDown = cursors.down.isDown || wasdKeys.S.isDown
+      const moving = leftDown || rightDown
 
-      if (cursors.left.isDown) {
+      if (leftDown) {
         player.setVelocityX(-200)
-        player.setFlipX(false)
-      } else if (cursors.right.isDown) {
+        playerSprite.setFlipX(false)
+      } else if (rightDown) {
         player.setVelocityX(200)
-        player.setFlipX(true)
+        playerSprite.setFlipX(true)
       } else {
         player.setVelocityX(0)
       }
 
       // Lógica de salto y doble salto
-      const isJumpJustDown = Phaser.Input.Keyboard.JustDown(cursors.up) || Phaser.Input.Keyboard.JustDown(cursors.space)
-
       if (onGround) {
         player.canDoubleJump = true
         player.isDoubleJumping = false
-        if (isJumpJustDown) {
+        if (upJustDown) {
           player.setVelocityY(-200)
         }
-      } else if (isJumpJustDown && player.canDoubleJump) {
-        player.setVelocityY(-250)
+      } else if (upJustDown && player.canDoubleJump) {
+        player.setVelocityY(-350)
         player.canDoubleJump = false
         player.isDoubleJumping = true
       }
 
-      // Animaciones
-      if (cursors.down.isDown && onGround) {
-        player.anims.stop()
-        player.setTexture('playerSit')
-        player.setScale(0.3)
-        player.body.setSize(260, 300)
-        player.body.setOffset(0, 150)
+      // Sincronización base del sprite con el cuerpo
+      playerSprite.x = player.x
+      let visualOffsetY = 0
+
+      // Animaciones y offsets
+      if (downDown && onGround) {
+        playerSprite.anims.stop()
+        playerSprite.setTexture('playerSit')
+
+        // Offset visual solicitado (+50)
+        visualOffsetY = 30
+
+        // Dimensiones del cuerpo (mantener hitbox normal)
+        player.body.setSize(280, 540)
+        player.body.setOffset(60, 20)
       } else {
-        player.body.setSize(260, 450)
-        player.body.setOffset(0, 0)
+        // Volver a dimensiones cuerpo normales
+        player.body.setSize(280, 540)
+        player.body.setOffset(64, 20)
 
         if (!onGround) {
-          player.anims.stop()
+          playerSprite.anims.stop()
           if (player.isDoubleJumping) {
-            player.setTexture('playerJump2')
-            player.setScale(0.3) // Ahora es jump.png
+            playerSprite.setTexture('playerJump2')
           } else {
-            player.setTexture('playerJump')
-            player.setScale(0.3) // Ahora es jump2.png
+            playerSprite.setTexture('playerJump')
           }
         } else if (moving) {
-          player.play('walk', true)
-          player.setScale(0.3)
+          playerSprite.play('walk', true)
         } else {
-          player.anims.stop()
-          player.setTexture('player')
-          player.setScale(0.3)
+          playerSprite.anims.stop()
+          playerSprite.setTexture('player')
         }
       }
+
+      // Aplicar posición final con offset
+      playerSprite.y = player.y + visualOffsetY
     }
   })
 

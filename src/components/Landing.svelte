@@ -35,6 +35,19 @@
 
   let calendarOpened = $state(false)
   let easterEggOpened = $state(false)
+  let showControls = $state(true)
+
+  function handleKeyDown(e) {
+    if (['w', 'a', 's', 'd', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) {
+      showControls = false
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }
+
+  $effect(() => {
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  })
 
   $effect(() => {
     if (gameFinished) {
@@ -53,6 +66,16 @@
     }
     100% {
       opacity: 1;
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
     }
   }
 
@@ -200,14 +223,6 @@
 
             &.completed {
               opacity: 0.6;
-              &::after {
-                content: '✓';
-                position: absolute;
-                font-size: 0.7rem;
-                bottom: 2px;
-                right: 4px;
-                color: var(--colorPrimary);
-              }
             }
           }
         }
@@ -255,12 +270,75 @@
       height: 100vh;
       position: relative;
     }
+
+    .controls-hint {
+      position: absolute;
+      top: 140px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 200;
+      color: white;
+      text-align: center;
+      opacity: 0.7;
+      pointer-events: none;
+      user-select: none;
+      transition: opacity 0.5s ease;
+
+      .hint-title {
+        font-size: 14px;
+        letter-spacing: 4px;
+        margin-bottom: 15px;
+        font-weight: 900;
+        font-family: var(--fontSecondary);
+        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+      }
+
+      .hint-keys {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        align-items: center;
+        font-size: 16px;
+        font-family: var(--fontSecondary);
+        font-weight: bold;
+
+        span {
+          border: 1px solid rgba(255, 255, 255, 0.5);
+          padding: 6px 14px;
+          border-radius: 8px;
+          background: rgba(255, 255, 255, 0.15);
+          backdrop-filter: blur(8px);
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .separator {
+          opacity: 0.5;
+          border: none;
+          background: none;
+          padding: 0;
+          box-shadow: none;
+          backdrop-filter: none;
+          font-size: 12px;
+        }
+      }
+    }
   }
 </style>
 
 <div class="landing-wrapper" class:gameFinished>
   <Menu bind:calendarOpened />
   <img src="/backgrounds/transparentTV.png" alt="" />
+
+  {#if showControls}
+    <div class="controls-hint">
+      <div class="hint-title">CONTROLS</div>
+      <div class="hint-keys">
+        <span>WASD</span>
+        <span class="separator">OR</span>
+        <span>ARROWS</span>
+      </div>
+    </div>
+  {/if}
 
   <div class="calendar" class:opened={easterEggOpened}>
     <button class="close-btn" onclick={() => (easterEggOpened = false)} aria-label="Close easter egg">
@@ -337,7 +415,11 @@
             class:completed={new Date(week.date + ' 20:00') < now}
             onclick={() => (selectedIndex = i)}
           >
-            {i + 1}
+            {#if new Date(week.date + ' 20:00') < now}
+              ✓
+            {:else}
+              {i + 1}
+            {/if}
           </button>
         {/each}
       </div>

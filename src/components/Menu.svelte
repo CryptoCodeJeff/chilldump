@@ -75,8 +75,8 @@
       cursor: pointer;
 
       .nav-icon {
-        width: 20px;
-        height: 20px;
+        width: 30px;
+        height: 30px;
         border-radius: 4px;
         transition: transform 0.3s ease;
       }
