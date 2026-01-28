@@ -133,7 +133,18 @@
         <img src="/calendar.png" alt="Calendar" class="nav-icon" />
         <span>Roadmap</span>
       </button>
-      <button class="nav-item" onclick={() => (audioMuted = !audioMuted)}>
+      <button
+        class="nav-item"
+        onclick={() => {
+          audioMuted = !audioMuted
+          // Forzamos el silenciado a nivel global de Phaser si existe
+          if (typeof window !== 'undefined' && window.Phaser) {
+            window.Phaser.GAMES.forEach((g) => {
+              if (g.sound) g.sound.mute = audioMuted
+            })
+          }
+        }}
+      >
         <span class="nav-icon" style="font-size: 24px; display: flex; align-items: center; justify-content: center;">
           {audioMuted ? '🔇' : '🔊'}
         </span>

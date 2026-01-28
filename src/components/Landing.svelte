@@ -323,6 +323,60 @@
         }
       }
     }
+
+    .mobile-disclaimer {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 99999;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      text-align: center;
+
+      .disclaimer-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+
+        img {
+          position: static;
+          width: 120px;
+          height: 120px;
+          opacity: 1;
+          pointer-events: auto;
+          animation: float 3s ease-in-out infinite;
+        }
+
+        h2 {
+          color: var(--colorPrimary);
+          font-family: var(--fontPrimary);
+          font-size: 2rem;
+          margin: 0;
+          text-transform: uppercase;
+          letter-spacing: 2px;
+        }
+
+        p {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 1.1rem;
+          line-height: 1.6;
+          max-width: 300px;
+          margin: 0;
+        }
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .mobile-disclaimer {
+        display: flex;
+      }
+    }
   }
 </style>
 
@@ -429,5 +483,13 @@
 
   <div class="game-container">
     <Game bind:gameFinished bind:calendarOpened bind:easterEggOpened bind:audioMuted />
+  </div>
+
+  <div class="mobile-disclaimer">
+    <div class="disclaimer-content">
+      <img src="/sprites/normal.png" alt="Chilldump" />
+      <h2>Desktop Only</h2>
+      <p>Sorry, this experience is currently optimized for desktop players. Take a dump on your computer!</p>
+    </div>
   </div>
 </div>

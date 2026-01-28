@@ -56,7 +56,7 @@
 
     let player, playerSprite
     let cursors, wasdKeys
-    let sofaSound, jumpSound, fartSound
+    let sofaSound, jumpSound, fartSound, marcianoSound
 
     function preload() {
       this.load.image('background', '/backgrounds/banner.png')
@@ -70,6 +70,7 @@
       this.load.audio('sofaSound', '/sounds/cg8bit.wav')
       this.load.audio('jumpSound', '/sounds/jump.mp3')
       this.load.audio('fartSound', '/sounds/fart.wav')
+      this.load.audio('marcianoSound', '/sounds/marciano.mp3')
 
       const shitNames = [
         'bullshit',
@@ -272,6 +273,7 @@
         'golden',
         'bullshit',
         'cow',
+        'marciano',
         'cute',
         'death',
         'shark',
@@ -280,7 +282,6 @@
         'funny',
         'gay',
         'ice',
-        'marciano',
         'pink',
         'rainbow',
         'rare',
@@ -296,7 +297,7 @@
         { x: width / 2 - 500, y: height / 2 - 200 }, // golden
         { x: width / 2 + 400, y: 200 }, // bullshit
         { x: width / 2 + 500, y: 600 }, // cow
-        { x: width / 2 - 500, y: 600 }, // cute
+        { x: width / 2 - 500, y: 600 }, // marciano
         { x: width / 2 + 500, y: 1150 }, // death
         { x: width / 2 + 150, y: 1300 }, // shark
         { x: width / 2 - 200, y: 1450 }, // doge
@@ -304,7 +305,7 @@
         { x: width / 2 - 250, y: 2400 }, // funny
         { x: width / 2 + 150, y: 2200 }, // gay
         { x: width / 2 - 450, y: 1800 }, // ice
-        { x: width / 2 + 450, y: 1800 }, // marciano
+        { x: width / 2 + 450, y: 1800 }, // cute
         { x: width / 2 - 50, y: 2900 }, // pink
         { x: width / 2 + 50, y: 3200 }, // rainbow
         { x: width / 2, y: 3600 }, // rare
@@ -323,6 +324,7 @@
           shitSensor.setScale(0.2)
           shitSensor.setVisible(false) // No queremos ver el sprite estático
           shitSensor.body.setAllowGravity(false)
+          shitSensor.shitName = name
 
           // Creamos el elemento DOM para ver el GIF animado
           const shitDom = this.add
@@ -394,7 +396,16 @@
         }
         shit.destroy()
         shitsCollected++
-        fartSound.play()
+        if (!audioMuted) {
+          if (shit.shitName === 'marciano') {
+            marcianoSound.play()
+          } else {
+            fartSound.play({
+              detune: Phaser.Math.Between(-500, 500),
+              volume: Phaser.Math.FloatBetween(0.8, 1.2),
+            })
+          }
+        }
 
         if (shitsCollected >= totalShits) {
           const btn = socialsDom.getChildByID('easteregg-btn')
@@ -408,13 +419,14 @@
       sofaSound = this.sound.add('sofaSound', { loop: false, volume: 0.3 })
       jumpSound = this.sound.add('jumpSound', { loop: false })
       fartSound = this.sound.add('fartSound', { loop: false })
+      marcianoSound = this.sound.add('marcianoSound', { loop: false })
 
       // Colisión con plataformas
       this.physics.add.collider(player, platforms, (p, platform) => {
         const justLanded = p.body.touching.down && !p.body.wasTouching.down
 
         if (justLanded && platform === pSofa && !sofaSound.isPlaying) {
-          sofaSound.play()
+          if (!audioMuted) sofaSound.play()
         }
 
         if (justLanded && platform.associatedDom && !platform.associatedDom.isBouncing) {
@@ -483,7 +495,7 @@
         player.setVelocityY(-350)
         player.canDoubleJump = false
         player.isDoubleJumping = true
-        jumpSound.play()
+        if (!audioMuted) jumpSound.play()
       }
 
       // Sincronización base del sprite con el cuerpo
@@ -526,10 +538,21 @@
     }
 
     $effect(() => {
-      // Forzamos la dependencia reactiva con audioMuted
       const isMuted = audioMuted
       if (game && game.sound) {
         game.sound.mute = isMuted
+        if (isMuted) {
+          game.sound.stopAll()
+        }
+      }
+      // Respaldo global
+      if (typeof window !== 'undefined' && window.Phaser) {
+        window.Phaser.GAMES.forEach((g) => {
+          if (g.sound) {
+            g.sound.mute = isMuted
+            if (isMuted) g.sound.stopAll()
+          }
+        })
       }
     })
   })
