@@ -264,8 +264,7 @@
         }
       })
 
-      // Sincronizar estado inicial de audio
-      this.sound.mute = audioMuted
+      // El estado inicial se gestionará en el $effect de fuera para mayor fiabilidad
 
       // Grupo de Shits (coleccionables)
       const shitsGroup = this.physics.add.group()
@@ -406,7 +405,7 @@
       })
 
       // Preparamos sonidos
-      sofaSound = this.sound.add('sofaSound', { loop: false })
+      sofaSound = this.sound.add('sofaSound', { loop: false, volume: 0.3 })
       jumpSound = this.sound.add('jumpSound', { loop: false })
       fartSound = this.sound.add('fartSound', { loop: false })
 
@@ -527,8 +526,10 @@
     }
 
     $effect(() => {
+      // Forzamos la dependencia reactiva con audioMuted
+      const isMuted = audioMuted
       if (game && game.sound) {
-        game.sound.mute = audioMuted
+        game.sound.mute = isMuted
       }
     })
   })
