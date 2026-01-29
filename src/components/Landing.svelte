@@ -274,53 +274,122 @@
 
     .controls-hint {
       position: absolute;
-      top: 140px;
+      top: 160px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 200;
       color: white;
       text-align: center;
-      opacity: 0.7;
+      opacity: 0.9;
       pointer-events: none;
       user-select: none;
-      transition: opacity 0.5s ease;
+      animation: fadeInUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 20px 40px;
+      border-radius: 24px;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(var(--colorPrimaryRgb), 0.2);
+      box-shadow:
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        inset 0 0 20px rgba(var(--colorPrimaryRgb), 0.05);
 
       .hint-title {
-        font-size: 14px;
-        letter-spacing: 4px;
-        margin-bottom: 15px;
+        font-size: 12px;
+        letter-spacing: 6px;
+        margin-bottom: 20px;
         font-weight: 900;
         font-family: var(--fontSecondary);
-        text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        color: var(--colorPrimary);
+        text-transform: uppercase;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+
+        &::before,
+        &::after {
+          content: '';
+          height: 1px;
+          width: 20px;
+          background: linear-gradient(90deg, transparent, var(--colorPrimary));
+        }
+        &::after {
+          background: linear-gradient(90deg, var(--colorPrimary), transparent);
+        }
       }
 
       .hint-keys {
         display: flex;
-        gap: 15px;
+        gap: 25px;
         justify-content: center;
         align-items: center;
-        font-size: 16px;
+        font-size: 14px;
         font-family: var(--fontSecondary);
-        font-weight: bold;
 
-        span {
-          border: 1px solid rgba(255, 255, 255, 0.5);
-          padding: 6px 14px;
-          border-radius: 8px;
-          background: rgba(255, 255, 255, 0.15);
-          backdrop-filter: blur(8px);
-          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        .key-group {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+
+          .key-bottom {
+            display: flex;
+            gap: 4px;
+          }
+        }
+
+        .key {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 32px;
+          height: 32px;
+          padding: 0 4px;
+          border-radius: 6px;
+          background: linear-gradient(180deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-bottom: 3px solid rgba(255, 255, 255, 0.2);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+          font-weight: 900;
+          color: white;
+          font-size: 16px;
+          line-height: 1;
         }
 
         .separator {
-          opacity: 0.5;
-          border: none;
-          background: none;
-          padding: 0;
-          box-shadow: none;
-          backdrop-filter: none;
-          font-size: 12px;
+          opacity: 0.3;
+          font-size: 20px;
+          font-weight: 300;
+          height: 30px;
+          width: 1px;
+          background: white;
+          display: block;
+          overflow: hidden;
+          text-indent: -9999px;
         }
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+      }
+      to {
+        opacity: 0.9;
+        transform: translate(-50%, 0);
+      }
+    }
+
+    @keyframes pulse {
+      0%,
+      100% {
+        transform: translateY(0) scale(1);
+        filter: drop-shadow(0 0 8px rgba(var(--colorPrimaryRgb), 0.5));
+      }
+      50% {
+        transform: translateY(-2px) scale(1.05);
+        filter: drop-shadow(0 0 12px rgba(var(--colorPrimaryRgb), 0.8));
       }
     }
 
@@ -388,9 +457,23 @@
     <div class="controls-hint">
       <div class="hint-title">CONTROLS</div>
       <div class="hint-keys">
-        <span>WASD</span>
-        <span class="separator">OR</span>
-        <span>ARROWS</span>
+        <div class="key-group">
+          <span class="key">W</span>
+          <div class="key-bottom">
+            <span class="key">A</span>
+            <span class="key">S</span>
+            <span class="key">D</span>
+          </div>
+        </div>
+        <span class="separator">/</span>
+        <div class="key-group">
+          <span class="key">▲</span>
+          <div class="key-bottom">
+            <span class="key">◀</span>
+            <span class="key">▼</span>
+            <span class="key">▶</span>
+          </div>
+        </div>
       </div>
     </div>
   {/if}
