@@ -5,19 +5,19 @@
   let gameFinished = $state(false)
 
   let weeks = $state([
-    /*{ date: '04 Jan 2026', ca: '-', grow: '-' },
-    { date: '11 Jan 2026', ca: '-', grow: '-' },
-    { date: '18 Jan 2026', ca: '-', grow: '-' },
-    { date: '25 Jan 2026', ca: '-', grow: '-' },*/
-    { date: '01 Feb 2026', ca: '6M7H3XMi97N4jd4prchiEbRdtZT5wzYJwg2w3PMudump', grow: '0%' },
-    { date: '08 Feb 2026', ca: '-', grow: '-' },
-    { date: '15 Feb 2026', ca: '-', grow: '-' },
-    { date: '22 Feb 2026', ca: '-', grow: '-' },
-    { date: '01 Mar 2026', ca: '-', grow: '-' },
-    { date: '08 Mar 2026', ca: '-', grow: '-' },
-    { date: '15 Mar 2026', ca: '-', grow: '-' },
-    { date: '22 Mar 2026', ca: '-', grow: '-' },
-    { date: '29 Mar 2026', ca: '-', grow: '-' },
+    /*{ date: '04 Jan 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '11 Jan 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '18 Jan 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '25 Jan 2026', ca: '-', grow: '-', holders: '-' },*/
+    { date: '01 Feb 2026', ca: '6M7H3XMi97N4jd4prchiEbRdtZT5wzYJwg2w3PMudump', grow: '9.17%', holders: '7' },
+    { date: '08 Feb 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '15 Feb 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '22 Feb 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '01 Mar 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '08 Mar 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '15 Mar 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '22 Mar 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '29 Mar 2026', ca: '-', grow: '-', holders: '-' },
   ])
 
   const now = new Date()
@@ -537,6 +537,7 @@
           </span>
         </p>
         <p>Growth: <span>{weeks[selectedIndex].grow}</span></p>
+        <p>Holders: <span>{weeks[selectedIndex].holders}</span></p>
 
         <a href={`https://dumpfun.io/dumpflow/${weeks[selectedIndex].ca}`} target="_blank">
           <p>CA: <span>{weeks[selectedIndex].ca}</span></p>
