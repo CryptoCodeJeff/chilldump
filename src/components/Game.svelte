@@ -66,6 +66,7 @@
       this.load.image('playerJump', '/sprites/jump2.png')
       this.load.image('playerJump2', '/sprites/jump.png')
       this.load.image('playerSit', '/sprites/sit.png')
+      this.load.image('playerDead', '/sprites/dead.png')
       this.load.image('sofa', '/sprites/sofa.png')
       this.load.audio('sofaSound', '/sounds/cg8bit.wav')
       this.load.audio('jumpSound', '/sounds/jump.mp3')
@@ -97,6 +98,16 @@
       shitNames.forEach((name) => {
         this.load.image(`shit_${name}`, `/sprites/shits/${name}.gif`)
       })
+
+      // Rugs (deadly coins)
+      this.load.image('rug_pambi', '/rugs/pambi.png')
+      this.load.image('rug_trump', '/rugs/trump.jpg')
+      this.load.image('rug_milei', '/rugs/milei.jpg')
+
+      // Rug Sounds
+      this.load.audio('sound_rug_pambi', '/sounds/pambi.mp3')
+      this.load.audio('sound_rug_trump', '/sounds/trump.mp3')
+      this.load.audio('sound_rug_milei', '/sounds/milei.mp3')
     }
 
     function create() {
@@ -106,7 +117,21 @@
       const worldHeight = 5000
 
       // Declaramos variables para los elementos que necesitan reposicionarse
-      let titleDom, t1, t2, step1Dom, p1, step2Dom, p2, step3Dom, p3, socialsDom, areYouReadyDom, justachilldumpDom, sofaSprite, pSofa
+      let titleDom,
+        t1,
+        t2,
+        step1Dom,
+        p1,
+        step2Dom,
+        p2,
+        step3Dom,
+        p3,
+        socialsDom,
+        areYouReadyDom,
+        justachilldumpDom,
+        sofaSprite,
+        pSofa,
+        rugsGroup
 
       const updateResolution = () => {
         const { width: currentWidth, height: currentHeight } = this.scale
@@ -180,6 +205,15 @@
             }
           }
         })
+
+        // Reposicionar todos los rugs proporcionalmente al centro
+        if (rugsGroup) {
+          rugsGroup.getChildren().forEach((rug) => {
+            if (rug.xOffset !== undefined) {
+              rug.setX(currentWidth / 2 + rug.xOffset)
+            }
+          })
+        }
       }
 
       // Escuchamos el evento de redimensión de Phaser
@@ -364,6 +398,57 @@
         }
       })
 
+      // Grupo de Rugs (mortales)
+      rugsGroup = this.physics.add.group()
+      const rugPositions = [
+        { x: width / 2 - 420, y: 950, key: 'rug_pambi' },
+        { x: width / 2 + 300, y: 1350, key: 'rug_milei' },
+        { x: width / 2 + 250, y: 2500, key: 'rug_trump' },
+      ]
+
+      rugPositions.forEach((pos) => {
+        const rug = rugsGroup.create(pos.x, pos.y, pos.key)
+        rug.audioKey = `sound_${pos.key}` // Guardamos la referencia al sonido
+
+        // Logica "Object-fit: cover"
+        const scale = Math.max(80 / rug.width, 80 / rug.height)
+        rug.setScale(scale)
+
+        rug.body.setAllowGravity(false)
+        // Hitbox circular de 40px (radio) ajustada a la escala de la imagen
+        const bodyRadius = 40 / scale
+        rug.body.setCircle(bodyRadius, (rug.width - bodyRadius * 2) / 2, (rug.height - bodyRadius * 2) / 2)
+        rug.xOffset = pos.x - width / 2
+
+        // Crear máscara circular para el rug
+        const maskShape = this.make.graphics()
+        maskShape.fillStyle(0xffffff)
+        maskShape.fillCircle(pos.x, pos.y, 40) // Radio 40 para tamaño 80
+        const mask = maskShape.createGeometryMask()
+        rug.setMask(mask)
+
+        // Vincular la máscara al movimiento del rug
+        rug.associatedMaskShape = maskShape
+
+        // Animación de flotado
+        this.tweens.add({
+          targets: rug,
+          y: pos.y - 20,
+          duration: 1500 + Math.random() * 1000,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+          onUpdate: () => {
+            // Actualizar posición de la máscara junto con el sprite
+            if (rug.associatedMaskShape) {
+              rug.associatedMaskShape.clear()
+              rug.associatedMaskShape.fillStyle(0xffffff)
+              rug.associatedMaskShape.fillCircle(rug.x, rug.y, 40)
+            }
+          },
+        })
+      })
+
       // Jugador (Cuerpo físico invisible)
       player = this.physics.add
         .sprite(width / 2 + 100, 0, 'player')
@@ -415,11 +500,57 @@
         }
       })
 
+      // Colisión con Rugs (Muerte)
+      this.physics.add.overlap(player, rugsGroup, (p, rug) => {
+        if (!p.isDead) {
+          p.isDead = true
+          if (!audioMuted) {
+            const specificSound = sounds[rug.audioKey]
+            if (specificSound) {
+              specificSound.play()
+            } else {
+              fartSound.play({ rate: 0.5 })
+            }
+          }
+
+          // Salto de muerte
+          p.setVelocityY(-350)
+          p.setAccelerationX(0)
+
+          // Efecto visual "99%"
+          const rugText = this.add
+            .text(rug.x, rug.y - 40, '-99%', {
+              fontSize: '48px',
+              fontFamily: 'Pixel Operator Mono',
+              color: '#ff0000',
+              stroke: '#000000',
+              strokeThickness: 6,
+            })
+            .setOrigin(0.5)
+
+          this.tweens.add({
+            targets: rugText,
+            y: rugText.y - 150,
+            alpha: 0,
+            duration: 10000,
+            ease: 'Cubic.out',
+            onComplete: () => rugText.destroy(),
+          })
+        }
+      })
+
       // Preparamos sonidos
       sofaSound = this.sound.add('sofaSound', { loop: false, volume: 0.3 })
       jumpSound = this.sound.add('jumpSound', { loop: false })
       fartSound = this.sound.add('fartSound', { loop: false })
       marcianoSound = this.sound.add('marcianoSound', { loop: false })
+
+      // Rug Sounds
+      const sounds = {
+        sound_rug_pambi: this.sound.add('sound_rug_pambi'),
+        sound_rug_trump: this.sound.add('sound_rug_trump'),
+        sound_rug_milei: this.sound.add('sound_rug_milei'),
+      }
 
       // Colisión con plataformas
       this.physics.add.collider(player, platforms, (p, platform) => {
@@ -473,6 +604,17 @@
         Phaser.Input.Keyboard.JustDown(cursors.space)
       const downDown = cursors.down.isDown || wasdKeys.S.isDown
       const moving = leftDown || rightDown
+
+      if (player.isDead) {
+        player.setVelocityX(0)
+        playerSprite.setTexture('playerDead')
+        playerSprite.setScale(0.2) // Solo el sprite de muerte es más pequeño
+        playerSprite.x = player.x
+        playerSprite.y = player.y + 50
+        return
+      }
+
+      playerSprite.setScale(0.3) // Aseguramos que el resto tengan su escala normal
 
       if (leftDown) {
         player.setVelocityX(-200)
