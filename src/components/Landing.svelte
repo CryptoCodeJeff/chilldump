@@ -10,8 +10,8 @@
     { date: '18 Jan 2026', ca: '-', grow: '-', holders: '-' },
     { date: '25 Jan 2026', ca: '-', grow: '-', holders: '-' },*/
     { date: '01 Feb 2026', ca: '6M7H3XMi97N4jd4prchiEbRdtZT5wzYJwg2w3PMudump', grow: '20%', holders: '9' },
-    { date: '08 Feb 2026', ca: '4q5KZQ9SGt6QkbEaTpVR8gANizF74cy7zc53X2cSdump', grow: '6%', holders: '2' },
-    { date: '15 Feb 2026', ca: '-', grow: '-', holders: '-' },
+    { date: '08 Feb 2026', ca: '4q5KZQ9SGt6QkbEaTpVR8gANizF74cy7zc53X2cSdump', grow: '30%', holders: '7' },
+    { date: '15 Feb 2026', ca: 'BHym2DsPB9wFvxN8NLghMpR9TPDzH8NkH6DyfSsRdump', grow: '-', holders: '-' },
     { date: '22 Feb 2026', ca: '-', grow: '-', holders: '-' },
     { date: '01 Mar 2026', ca: '-', grow: '-', holders: '-' },
     { date: '08 Mar 2026', ca: '-', grow: '-', holders: '-' },
